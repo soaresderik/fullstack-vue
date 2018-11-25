@@ -21,6 +21,14 @@
             {{item.title}}
           </v-list-tile-content>
         </v-list-tile>
+
+        <v-list-tile v-if="user" @click="handleSignoutUser">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>Sair</v-list-tile-content>
+        </v-list-tile>
+
       </v-list>
     </v-navigation-drawer>
 
@@ -45,6 +53,20 @@
           <v-icon class="hidden-sm-only" left>{{ item.icon }}</v-icon>
           {{ item.title }}
         </v-btn>
+
+        <v-btn flat to="/profile" v-if="user">
+          <v-icon class="hidden-sm-only" left>account_box</v-icon>
+          <v-badge right color="blue darken-2">
+            <span slot="badge">1</span>
+            Perfil
+          </v-badge>
+        </v-btn>
+
+        <v-btn flat v-if="user" @click="handleSignoutUser">
+          <v-icon class="hidden-sm-only">exit_to_app</v-icon>
+          Sair
+        </v-btn>
+
       </v-toolbar-items>
 
     </v-toolbar>
@@ -54,6 +76,19 @@
         <transition name="fade">
           <router-view></router-view>
         </transition>
+
+        <v-snackbar v-model="authSnackbar" color="success" :timeout="5000" bottom left>
+          <v-icon class="mr-3">check_circle</v-icon>
+          <h3>Você esta loggado!</h3>
+          <v-btn dask flat @click="authSnackbar = false">Fechar</v-btn>
+        </v-snackbar>
+
+        <v-snackbar v-if="authError" v-model="authErrorSnackbar" color="info" :timeout="5000" bottom left>
+          <v-icon class="mr-3">cancel</v-icon>
+          <h3>{{authError.message}}</h3>
+          <v-btn dask flat to="/signin">Entrar</v-btn>
+        </v-snackbar>
+
       </v-container>
     </main>
 
@@ -61,30 +96,63 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "App",
   data() {
     return {
-      sideNav: false
+      sideNav: false,
+      authSnackbar: true,
+      authErrorSnackbar: false
     };
   },
+  watch: {
+    user(newValue, oldValue) {
+      if (oldValue === null) {
+        this.authSnackbar = true;
+      }
+    },
+    authError(value) {
+      if (value !== null) {
+        this.authErrorSnackbar = true;
+      }
+    }
+  },
   computed: {
+    ...mapGetters(["authError", "user"]),
     horizontalNavItems() {
-      return [
+      let items = [
         { icon: "chat", title: "Posts", link: "/posts" },
         { icon: "lock_open", title: "Login", link: "/signin" },
         { icon: "create", title: "Cadastre-se", link: "/signup" }
       ];
+      if (this.user) items = [{ icon: "chat", title: "Posts", link: "/posts" }];
+
+      return items;
     },
     sideNavItems() {
-      return [
+      let items = [
         { icon: "chat", title: "Posts", link: "/posts" },
         { icon: "lock_open", title: "Login", link: "/signin" },
         { icon: "create", title: "Cadastre-se", link: "/signup" }
       ];
+
+      if (this.user) {
+        items = [
+          { icon: "chat", title: "Posts", link: "/posts" },
+          { icon: "stars", title: "Criar Post", link: "/post/add" },
+          { icon: "account_box", title: "Perfil", link: "/profile" }
+        ];
+      }
+
+      return items;
     }
   },
   methods: {
+    handleSignoutUser() {
+      this.$store.dispatch("signoutUser");
+    },
     toggleSideNav() {
       this.sideNav = !this.sideNav;
     }

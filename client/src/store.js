@@ -5,7 +5,12 @@ import { gql } from "apollo-boost";
 
 import { defaultClient as apolloClient } from "./main";
 
-import { GET_POSTS, SIGNIN_USER, GET_CURRENT_USER } from "./queries";
+import {
+  GET_POSTS,
+  SIGNIN_USER,
+  SIGNUP_USER,
+  GET_CURRENT_USER
+} from "./queries";
 
 Vue.use(Vuex);
 
@@ -70,7 +75,7 @@ export default new Vuex.Store({
     signinUser: ({ commit }, payload) => {
       commit("clearError");
       commit("setLoading", true);
-      localStorage.setItem("token", "");
+
       apolloClient
         .mutate({
           mutation: SIGNIN_USER,
@@ -79,6 +84,27 @@ export default new Vuex.Store({
         .then(({ data }) => {
           commit("setLoading", false);
           localStorage.setItem("token", data.signinUser.token);
+
+          router.go();
+        })
+        .catch(err => {
+          commit("setLoading", false);
+          commit("setError", err);
+          console.error(err);
+        });
+    },
+    signupUser: ({ commit }, payload) => {
+      commit("clearError");
+      commit("setLoading", true);
+
+      apolloClient
+        .mutate({
+          mutation: SIGNUP_USER,
+          variables: payload
+        })
+        .then(({ data }) => {
+          commit("setLoading", false);
+          localStorage.setItem("token", data.signupUser.token);
 
           router.go();
         })

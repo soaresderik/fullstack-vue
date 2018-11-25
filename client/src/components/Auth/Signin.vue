@@ -1,57 +1,57 @@
 <template>
-    <v-container text-xs-center mt-5 pt-5>
+  <v-container text-xs-center mt-5 pt-5>
 
-        <v-layout row wrap>
-            <v-flex xs12 sm6 offset-sm3>
-                <h1>Seja Bem Vindo!</h1>
-            </v-flex>
-        </v-layout>
+    <v-layout row wrap>
+      <v-flex xs12 sm6 offset-sm3>
+        <h1>Seja Bem Vindo!</h1>
+      </v-flex>
+    </v-layout>
 
-        <v-layout v-if="error" row wrap>
-            <v-flex xs12 sm6 offset-sm3>
-                <form-alert :message="error.message"></form-alert>
-            </v-flex>
-        </v-layout>
+    <v-layout v-if="error" row wrap>
+      <v-flex xs12 sm6 offset-sm3>
+        <form-alert :message="error.message"></form-alert>
+      </v-flex>
+    </v-layout>
 
-        <v-layout row wrap>
-            <v-flex xs12 sm6 offset-sm3>
-                <v-card color="secondary" dark>
-                    <v-container>
-                        <v-form v-model="isFormValid" lazy-validation ref="form" @submit.prevent="handleSigninUser">
+    <v-layout row wrap>
+      <v-flex xs12 sm6 offset-sm3>
+        <v-card color="secondary" dark>
+          <v-container>
+            <v-form v-model="isFormValid" lazy-validation ref="form" @submit.prevent="handleSigninUser">
 
-                            <v-layout row>
-                                <v-flex xs12>
-                                    <v-text-field :rules="usernameRules" v-model="username" prepend-icon="face" label="Usuário" type="text" required></v-text-field>
-                                </v-flex>
-                            </v-layout>
+              <v-layout row>
+                <v-flex xs12>
+                  <v-text-field :rules="usernameRules" v-model="username" prepend-icon="face" label="Usuário" type="text" required></v-text-field>
+                </v-flex>
+              </v-layout>
 
-                            <v-layout row>
-                                <v-flex xs12>
-                                    <v-text-field :rules="passwordRules" v-model="password" prepend-icon="extension" label="Senha" type="password" required></v-text-field>
-                                </v-flex>
-                            </v-layout>
+              <v-layout row>
+                <v-flex xs12>
+                  <v-text-field :rules="passwordRules" v-model="password" prepend-icon="extension" label="Senha" type="password" required></v-text-field>
+                </v-flex>
+              </v-layout>
 
-                            <v-layout row>
-                                <v-flex xs12>
-                                    <v-btn :loading="loading" :disabled="!isFormValid" color="accent" type="submit">
-                                        Entrar
-                                        <span slot="loader" class="custom-loader">
-                                            <v-icon light>cached</v-icon>
-                                        </span>
-                                    </v-btn>
-                                    <h3>Ainda não tem uma conta?
-                                        <router-link to="/signup">Cadastre-se</router-link>
-                                    </h3>
-                                </v-flex>
-                            </v-layout>
+              <v-layout row>
+                <v-flex xs12>
+                  <v-btn :loading="loading" :disabled="!isFormValid || loading" color="accent" type="submit">
+                    Entrar
+                    <span slot="loader" class="custom-loader">
+                      <v-icon light>cached</v-icon>
+                    </span>
+                  </v-btn>
+                  <h3>Ainda não tem uma conta?
+                    <router-link to="/signup">Cadastre-se</router-link>
+                  </h3>
+                </v-flex>
+              </v-layout>
 
-                        </v-form>
-                    </v-container>
-                </v-card>
-            </v-flex>
-        </v-layout>
+            </v-form>
+          </v-container>
+        </v-card>
+      </v-flex>
+    </v-layout>
 
-    </v-container>
+  </v-container>
 </template>
 
 <script>

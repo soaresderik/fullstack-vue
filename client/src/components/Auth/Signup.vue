@@ -39,13 +39,13 @@
 
                             <v-layout row>
                                 <v-flex xs12>
-                                    <v-text-field :rules="passwordRules" v-model="passwordConfirmation" prepend-icon="gavel" label="Confirmar Senha" type="password" required></v-text-field>
+                                    <v-text-field :rules="passwordRules" v-model="confirmation" prepend-icon="gavel" label="Confirmar Senha" type="password" required></v-text-field>
                                 </v-flex>
                             </v-layout>
 
                             <v-layout row>
                                 <v-flex xs12>
-                                    <v-btn :loading="loading" :disabled="!isFormValid" color="info" type="submit">
+                                    <v-btn :loading="loading" :disabled="!isFormValid || loading" color="info" type="submit">
                                         Cadastrar
                                         <span slot="loader" class="custom-loader">
                                             <v-icon light>cached</v-icon>
@@ -76,17 +76,43 @@ export default {
       username: "",
       email: "",
       password: "",
-      passwordConfimation: "",
-      usernameRules: [username => !!username || "Usuário é obrigatório"],
-      emailRules: [email => !!email || "Email é obrigatório"],
-      passwordRules: [password => !!password || "Senha é obirgatório"]
+      confirmation: "",
+      usernameRules: [
+        username => !!username || "Usuário é obrigatório",
+        username =>
+          username.length < 10 || "Usuário deve ter menos que 10 caracteres"
+      ],
+      emailRules: [
+        email => !!email || "Email é obrigatório",
+        email => /.@+./.test(email) || "Deve ser um E-mail válido"
+      ],
+      passwordRules: [
+        password => !!password || "Senha é obirgatório",
+        password =>
+          password.length >= 4 || "Senha deve ser maior que 4 caracteres",
+        confirmation =>
+          confirmation === this.password || "As senhas devem corresponder"
+      ]
     };
   },
+  watch: {
+    user(value) {
+      if (value) this.$router.push("/");
+    }
+  },
   computed: {
-    ...mapGetters[("loading", "error")]
+    ...mapGetters(["loading", "error", "user"])
   },
   methods: {
-    handleSignupUser() {}
+    handleSignupUser() {
+      if (this.$refs.form.validate()) {
+        this.$store.dispatch("signupUser", {
+          username: this.username,
+          email: this.email,
+          password: this.password
+        });
+      }
+    }
   }
 };
 </script>

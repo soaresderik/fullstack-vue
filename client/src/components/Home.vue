@@ -2,18 +2,40 @@
   <v-container text-xs-center>
 
     <v-layout row>
-      <v-dialog v-model="loading" persistent fullscreen>
+      <v-dialog
+        v-model="loading"
+        persistent
+        fullscreen
+      >
         <v-container fill-height>
-          <v-layout row justify-center align-center>
-            <v-progress-circular indeterminate :size="70" :width="7" color="secondary"></v-progress-circular>
+          <v-layout
+            row
+            justify-center
+            align-center
+          >
+            <v-progress-circular
+              indeterminate
+              :size="70"
+              :width="7"
+              color="secondary"
+            ></v-progress-circular>
           </v-layout>
         </v-container>
       </v-dialog>
     </v-layout>
 
     <v-flex xs12>
-      <v-carousel v-if="!loading && posts.length > 0" v-bind="{ 'cicle': true }" interval="3000">
-        <v-carousel-item v-for="post in posts" :key="post._id" :src="post.imageUrl">
+      <v-carousel
+        v-if="!loading && posts.length > 0"
+        v-bind="{ 'cicle': true }"
+        interval="3000"
+      >
+        <v-carousel-item
+          v-for="post in posts"
+          :key="post._id"
+          :src="post.imageUrl"
+          @click.native="goToPost(post._id)"
+        >
           <h1 id="carousel__title">{{post.title}}</h1>
         </v-carousel-item>
       </v-carousel>
@@ -36,6 +58,9 @@ export default {
   methods: {
     handleGetCarrouselPosts() {
       this.$store.dispatch("getPosts");
+    },
+    goToPost(postId) {
+      this.$router.push(`/posts/${postId}`);
     }
   }
 };

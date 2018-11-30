@@ -68,19 +68,103 @@
         </v-card>
       </v-flex>
     </v-layout>
+
+    <div class="mt-3">
+      <v-layout
+        class="mb-3"
+        v-if="user"
+      >
+        <v-flex xs12>
+          <v-form
+            v-model="isFormValid"
+            lazy-validation
+            ref="form"
+            @submit.prevent="handleAddPostMessage"
+          >
+            <v-layout row>
+              <v-flex xs12>
+                <v-text-field
+                  :rules="messageRules"
+                  v-model="messageBody"
+                  clearable
+                  :append-outer-icon="messageBody && 'send'"
+                  label="Adicionar Mensagem"
+                  type="text"
+                  @click:append-outer="handleAddPostMessage"
+                  prepend-icon="email"
+                  required
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-form>
+        </v-flex>
+      </v-layout>
+
+      <v-layout
+        row
+        wrap
+      >
+        <v-flex xs12>
+          <v-list
+            subheader
+            two-line
+          >
+            <v-subheader>Mensagens ({{getPost.messages.length}})</v-subheader>
+
+            <template v-for="message in getPost.messages">
+              <v-divider :key="message._id"></v-divider>
+
+              <v-list-tile
+                avatar
+                inset
+                :key="message.title"
+              >
+                <v-list-tile-avatar>
+                  <img :src="message.messageUser.avatar">
+                </v-list-tile-avatar>
+
+                <v-list-tile-content>
+                  <v-list-tile-title>
+                    {{message.messageBody}}
+                  </v-list-tile-title>
+                  <v-list-tile-sub-title>
+                    {{message.messageUser.username}}
+                    <span class="grey--text text--lighten-1 hidden-xs-only">{{message.messageDate}}</span>
+                  </v-list-tile-sub-title>
+                </v-list-tile-content>
+
+                <v-list-tile-action class="hidden-xs-only">
+                  <v-icon :color="checkIfOwnMessage(message) ? 'accent' : 'grey'">chat_bubble</v-icon>
+                </v-list-tile-action>
+
+              </v-list-tile>
+            </template>
+
+          </v-list>
+        </v-flex>
+      </v-layout>
+    </div>
+
   </v-container>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-import { GET_POST } from "../../queries";
+import { GET_POST, ADD_POST_MESSAGE } from "../../queries";
 
 export default {
   name: "Post",
   props: ["postId"],
   data() {
     return {
-      dialog: false
+      dialog: false,
+      messageBody: "",
+      isFormValid: true,
+      messageRules: [
+        message => !!message || "Mensagem é obrigatória",
+        message =>
+          message.length < 100 || "Mensagem deve ser menor que 100 caracteres"
+      ]
     };
   },
   apollo: {
@@ -97,6 +181,37 @@ export default {
     ...mapGetters(["user"])
   },
   methods: {
+    handleAddPostMessage() {
+      if (this.$refs.form.validate()) {
+        const variables = {
+          messageBody: this.messageBody,
+          userId: this.user._id,
+          postId: this.postId
+        };
+
+        this.$apollo
+          .mutate({
+            mutation: ADD_POST_MESSAGE,
+            variables,
+            update: (cache, { data: { addPostMessage } }) => {
+              const data = cache.readQuery({
+                query: GET_POST,
+                variables: { postId: this.postId }
+              });
+              data.getPost.messages.unshift(addPostMessage);
+              cache.writeQuery({
+                query: GET_POST,
+                variables: { postId: this.postId },
+                data
+              });
+            }
+          })
+          .then(({ data }) => {
+            this.$refs.form.reset();
+          })
+          .catch(err => console.log(err));
+      }
+    },
     goToPreviousPage() {
       this.$router.go(-1);
     },
@@ -104,6 +219,9 @@ export default {
       if (window.innerWidth > 500) {
         this.dialog = !this.dialog;
       }
+    },
+    checkIfOwnMessage(message) {
+      return this.user && this.user._id === message.messageUser._id;
     }
   }
 };

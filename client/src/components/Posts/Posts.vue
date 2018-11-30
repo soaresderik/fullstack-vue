@@ -15,13 +15,11 @@
         v-for="post in infiniteScrollPosts.posts"
         :key="post._id"
       >
-        <v-card
-          @click.native="goToPost(post._id)"
-          hover
-        >
+        <v-card hover>
           <v-img
             :src="post.imageUrl"
             height="30vh"
+            @click.native="goToPost(post._id)"
             lazy
           ></v-img>
 

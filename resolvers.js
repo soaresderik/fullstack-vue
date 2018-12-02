@@ -137,7 +137,7 @@ module.exports = {
 
       const user = await User.findOneAndUpdate(
         { username },
-        { $addToSet: { favorites: postId } },
+        { $pull: { favorites: postId } },
         { new: true }
       ).populate({
         path: "favorites",

@@ -83,6 +83,30 @@
         single-line-hide-details
       ></v-text-field>
 
+      <v-card
+        dark
+        v-if="searchResults.length"
+        id="search__card"
+      >
+        <v-list>
+          <v-list-tile
+            @click="goToSearchResult(result._id)"
+            v-for="result in searchResults"
+            :key="result._id"
+          >
+            <v-list-tile-title>
+              {{result.title}}
+              <span class="font-weight-thin">{{formatDescription(result.description)}}</span>
+            </v-list-tile-title>
+
+            <v-list-tile-action v-if="checkIfUserFavorite(result._id)">
+              <v-icon>favorite</v-icon>
+            </v-list-tile-action>
+
+          </v-list-tile>
+        </v-list>
+      </v-card>
+
       <v-spacer></v-spacer>
 
       <v-toolbar-items class="hidden-sm-only">
@@ -212,7 +236,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["authError", "user", "userFavorites"]),
+    ...mapGetters(["searchResults", "authError", "user", "userFavorites"]),
     horizontalNavItems() {
       let items = [
         { icon: "chat", title: "Posts", link: "/posts" },
@@ -250,6 +274,22 @@ export default {
     handleSignoutUser() {
       this.$store.dispatch("signoutUser");
     },
+    goToSearchResult(resultId) {
+      this.searchTerm = "";
+
+      this.$router.push(`/posts/${resultId}`);
+
+      this.$store.commit("clearSearchResults");
+    },
+    checkIfUserFavorite(resultId) {
+      return (
+        this.userFavorites &&
+        this.userFavorites.some(fave => fave._id === resultId)
+      );
+    },
+    formatDescription(desc) {
+      return desc.length > 20 ? `${desc.slice(0, 20)}...` : desc;
+    },
     toggleSideNav() {
       this.sideNav = !this.sideNav;
     }
@@ -272,6 +312,14 @@ export default {
 .fade-leave-active {
   opacity: 0;
   transform: translateX(-25px);
+}
+
+#search__card {
+  position: absolute;
+  width: 100vw;
+  z-index: 8;
+  top: 100%;
+  left: 0%;
 }
 
 .bounce {

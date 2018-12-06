@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  avater: {
+  avatar: {
     type: String
   },
   joinDate: {

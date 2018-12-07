@@ -12,9 +12,11 @@ import {
   GET_CURRENT_USER,
   ADD_POST,
   SEARCH_POSTS,
-  GET_USER_POSTS
+  UPDATE_USER_POST,
+  DELETE_USER_POST,
+  GET_USER_POSTS,
+  INFINITE_SCROLL_POSTS
 } from "./queries";
-import { UPDATE_USER_POST } from "../../../apoio/14 Profile Page Update  Delete Posts/077 Executing-updateUserPost-Mutation-with-Vuex-Action/client/src/queries";
 
 Vue.use(Vuex);
 
@@ -133,7 +135,16 @@ export default new Vuex.Store({
               _id: -1,
               ...payload
             }
-          }
+          },
+          refetchQueries: [
+            {
+              query: INFINITE_SCROLL_POSTS,
+              variables: {
+                pageNum: 1,
+                pageSize: 2
+              }
+            }
+          ]
         })
         .then(({ data }) => {
           console.log(data.addPost);
@@ -154,6 +165,24 @@ export default new Vuex.Store({
             ...state.userPosts.slice(index + 1)
           ];
           commit("setUserPosts", userPosts);
+        })
+        .catch(err => console.log(err));
+    },
+    deleteUserPost: ({ state, commit }, payload) => {
+      apolloClient
+        .mutate({
+          mutation: DELETE_USER_POST,
+          variables: payload
+        })
+        .then(({ data }) => {
+          const index = state.userPosts.findIndex(
+            post => post._id === data.deleteUserPost._id
+          );
+          const userPost = [
+            ...state.userPosts.slice(0, index),
+            ...state.userPosts.slice(index + 1)
+          ];
+          commit("setUserPosts", userPost);
         })
         .catch(err => console.log(err));
     },

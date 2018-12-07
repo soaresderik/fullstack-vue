@@ -23,7 +23,7 @@
             <v-card-title primary-title>
               <div>
                 <div class="headline">{{user.username}}</div>
-                <div>Desde {{user.joinDate}}</div>
+                <div>Desde {{formatJoinDate(user.joinDate)}}</div>
                 <div class="hidden-xs-only font-weight-thin">{{user.favorites.length}} Favoritos</div>
                 <div class="hidden-xs-only font-weight-thin">{{ userPosts.length}} Posts Adicionados</div>
               </div>
@@ -66,6 +66,7 @@
         >
           <v-card class="mt-3 ml-1 mr-2">
             <v-img
+              @click="goToPost(favorite._id)"
               height="30vh"
               :src="favorite.imageUrl"
             >
@@ -122,6 +123,7 @@
               <v-icon>edit</v-icon>
             </v-btn>
             <v-btn
+              @click="handleDeleteUserPost(post)"
               color="error"
               floating
               fab
@@ -132,6 +134,7 @@
             </v-btn>
 
             <v-img
+              @click="goToPost(post._id)"
               height="30vh"
               :src="post.imageUrl"
             ></v-img>
@@ -240,6 +243,7 @@
 </template>
 
 <script>
+import moment from "moment";
 import { mapGetters } from "vuex";
 
 export default {
@@ -274,6 +278,12 @@ export default {
     this.handleGetUserPosts();
   },
   methods: {
+    goToPost(postId) {
+      this.$router.push(`/posts/${postId}`);
+    },
+    formatJoinDate(date) {
+      return moment(new Date(date)).format("ll");
+    },
     handleGetUserPosts() {
       this.$store.dispatch("getUserPosts", {
         userId: this.user._id
@@ -291,6 +301,14 @@ export default {
         });
         this.editPostDialog = false;
       }
+    },
+    handleDeleteUserPost(post) {
+      this.loadPost(post, false);
+      const deletePost = window.confirm(
+        "Você tem certeza que deseja excluir este post?"
+      );
+      if (deletePost)
+        this.$store.dispatch("deleteUserPost", { postId: this.postId });
     },
     loadPost(
       { _id, title, imageUrl, categories, description },

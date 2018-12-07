@@ -155,6 +155,14 @@ export const UNLIKE_POST = gql`
   }
 `;
 
+export const DELETE_USER_POST = gql`
+  mutation($postId: ID!) {
+    deleteUserPost(postId: $postId) {
+      _id
+    }
+  }
+`;
+
 export const ADD_POST_MESSAGE = gql`
   mutation($messageBody: String!, $userId: ID!, $postId: ID!) {
     addPostMessage(

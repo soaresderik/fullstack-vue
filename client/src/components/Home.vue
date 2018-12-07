@@ -24,6 +24,22 @@
       </v-dialog>
     </v-layout>
 
+    <v-layout
+      class="mt-3 mb-3"
+      row
+      wrap
+      v-if="!loading"
+    >
+      <v-flex xs12>
+        <v-btn
+          class="secondary"
+          to="/posts"
+          large
+          dark
+        >Visualizar Posts</v-btn>
+      </v-flex>
+    </v-layout>
+
     <v-flex xs12>
       <v-carousel
         v-if="!loading && posts.length > 0"
@@ -69,6 +85,7 @@ export default {
 <style>
 #carousel__title {
   position: absolute;
+  cursor: pointer;
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
   border-radius: 5px 5px 0 0;

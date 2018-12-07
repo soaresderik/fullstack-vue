@@ -100,6 +100,19 @@ module.exports = {
 
       return newPost;
     },
+    updateUserPost: async (
+      _,
+      { postId, userId, title, imageUrl, categories, description },
+      { Post }
+    ) => {
+      const post = await Post.findOneAndUpdate(
+        { _id: postId, createdBy: userId },
+        { $set: { title, imageUrl, categories, description } },
+        { new: true }
+      );
+
+      return post;
+    },
     addPostMessage: async (_, { messageBody, userId, postId }, { Post }) => {
       const newMessage = {
         messageBody,

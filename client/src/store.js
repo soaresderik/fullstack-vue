@@ -14,6 +14,7 @@ import {
   SEARCH_POSTS,
   GET_USER_POSTS
 } from "./queries";
+import { UPDATE_USER_POST } from "../../../apoio/14 Profile Page Update  Delete Posts/077 Executing-updateUserPost-Mutation-with-Vuex-Action/client/src/queries";
 
 Vue.use(Vuex);
 
@@ -136,6 +137,23 @@ export default new Vuex.Store({
         })
         .then(({ data }) => {
           console.log(data.addPost);
+        })
+        .catch(err => console.log(err));
+    },
+    updateUserPost: ({ state, commit }, payload) => {
+      apolloClient
+        .mutate({ mutation: UPDATE_USER_POST, variables: payload })
+        .then(({ data }) => {
+          const index = state.userPosts.findIndex(
+            post => post._id === data.updateUserPost._id
+          );
+
+          const userPosts = [
+            ...state.userPosts.slice(0, index),
+            data.updateUserPost,
+            ...state.userPosts.slice(index + 1)
+          ];
+          commit("setUserPosts", userPosts);
         })
         .catch(err => console.log(err));
     },

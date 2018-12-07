@@ -112,6 +112,7 @@
             hover
           >
             <v-btn
+              @click="loadPost(post)"
               color="info"
               floating
               fab
@@ -140,6 +141,101 @@
       </v-layout>
     </v-container>
 
+    <v-dialog
+      xs12
+      sm6
+      offset-sm3
+      persistent
+      v-model="editPostDialog"
+    >
+      <v-card>
+        <v-card-title class="headline grey lighten-2">Atualizar Post</v-card-title>
+        <v-container>
+          <v-form
+            v-model="isFormValid"
+            lazy-validation
+            ref="form"
+            @submit.prevent="handleUpdateUserPost"
+          >
+
+            <v-layout row>
+              <v-flex xs12>
+                <v-text-field
+                  :rules="titleRules"
+                  v-model="title"
+                  label="Título"
+                  type="text"
+                  required
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+
+            <v-layout row>
+              <v-flex xs12>
+                <v-text-field
+                  :rules="imageRules"
+                  v-model="imageUrl"
+                  label="URL da imagem"
+                  type="text"
+                  required
+                ></v-text-field>
+              </v-flex>
+            </v-layout>
+
+            <v-layout>
+              <v-flex xs12>
+                <img
+                  :src="imageUrl"
+                  height="300px"
+                >
+              </v-flex>
+            </v-layout>
+
+            <v-layout>
+              <v-flex xs12>
+                <v-select
+                  v-model="categories"
+                  :rules="categoriesRules"
+                  :items="['Art', 'Educação', 'Comida', 'Lugares', 'Fotografia', 'Tecnologia']"
+                  multiple
+                  label="Categoria"
+                ></v-select>
+              </v-flex>
+            </v-layout>
+
+            <v-layout>
+              <v-flex xs12>
+                <v-textarea
+                  :rules="descRules"
+                  v-model="description"
+                  model="Descrição"
+                ></v-textarea>
+              </v-flex>
+            </v-layout>
+
+            <v-divider></v-divider>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                :disabled="!isFormValid"
+                type="submit"
+                class="success--text"
+                flat
+              >Atualizar</v-btn>
+              <v-btn
+                class="error--text"
+                flat
+                @click="editPostDialog = false"
+              >Cancelar</v-btn>
+            </v-card-actions>
+
+          </v-form>
+
+        </v-container>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -148,6 +244,29 @@ import { mapGetters } from "vuex";
 
 export default {
   name: "Perfil",
+  data() {
+    return {
+      editPostDialog: false,
+      isFormValid: true,
+      title: "",
+      imageUrl: "",
+      categories: [],
+      description: "",
+      titleRules: [
+        title => !!title || "Título é obrigatório",
+        title => title.length < 20 || "Título deve ter no máximo 20 caracteres"
+      ],
+      imageRules: [image => !!image || "Imagem é Obrigatória"],
+      categoriesRules: [
+        categories =>
+          categories.length >= 1 || "Deve conter no mínimo uma categoria"
+      ],
+      descRules: [
+        desc => !!desc || "Descrição é Obrigatoria",
+        desc => desc.length < 200 || "Título deve ter no máximo 200 caracteres"
+      ]
+    };
+  },
   computed: {
     ...mapGetters(["user", "userFavorites", "userPosts"])
   },
@@ -159,6 +278,30 @@ export default {
       this.$store.dispatch("getUserPosts", {
         userId: this.user._id
       });
+    },
+    handleUpdateUserPost() {
+      if (this.$refs.form.validate()) {
+        this.$store.dispatch("updateUserPost", {
+          postId: this.postId,
+          userId: this.user._id,
+          title: this.title,
+          imageUrl: this.imageUrl,
+          categories: this.categories,
+          description: this.description
+        });
+        this.editPostDialog = false;
+      }
+    },
+    loadPost(
+      { _id, title, imageUrl, categories, description },
+      editPostDialog = true
+    ) {
+      this.editPostDialog = editPostDialog;
+      this.postId = _id;
+      this.title = title;
+      this.imageUrl = imageUrl;
+      this.categories = categories;
+      this.description = description;
     }
   }
 };
